@@ -1,0 +1,11 @@
+# Ignore secret environment variables anywhere in the project
+.env
+
+# Ignore Python backend clutter
+__pycache__/
+venv/
+env/
+
+# Ignore Mac/Windows system files (just in case)
+.DS_Store
+Thumbs.db

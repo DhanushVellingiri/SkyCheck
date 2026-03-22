@@ -1,0 +1,121 @@
+import os
+import requests
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from dotenv import load_dotenv
+
+load_dotenv() # This is the magic line that loads your .env file!
+
+app = Flask(__name__)
+CORS(app)
+
+# Reads your API key from the .env file
+API_KEY = os.getenv('API_KEY')
+
+# ── Helper: shape the raw API response ───────────
+# OpenWeatherMap sends back a huge JSON object.
+# This picks out only the fields we actually need.
+def format_weather(data):
+    return {
+        'city':      data['name'],
+        'country':   data['sys']['country'],
+        'temp':      round(data['main']['temp']),
+        'feels':     round(data['main']['feels_like']),
+        'humidity':  data['main']['humidity'],
+        'wind':      round(data['wind']['speed'] * 3.6),  # m/s → km/h
+        'high':      round(data['main']['temp_max']),
+        'low':       round(data['main']['temp_min']),
+        'condition': data['weather'][0]['description'].capitalize()
+    }
+
+# ── Endpoint 1: search by city name ──────────────
+# Called by: frontend search box
+# Example:   GET /weather?city=london
+@app.route('/weather')
+def get_weather():
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    #ip = request.remote_addr  # get the caller's IP address
+
+    if is_rate_limited(ip):
+        return jsonify({
+            'error': 'Daily limit reached. Come back tomorrow.'
+        }), 429  # 429 is the official HTTP code for "too many requests"
+    
+    city = request.args.get('city')
+
+    if not city:
+        return jsonify({ 'error': 'No city provided' }), 400
+
+    url = f'https://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric'
+    response = requests.get(url)
+
+    if response.status_code != 200:
+        return jsonify({ 'error': 'City not found' }), 404
+
+    return jsonify(format_weather(response.json()))
+
+# ── Endpoint 2: search by coordinates ────────────
+# Called by: frontend "Use my location" button
+# Example:   GET /weather-by-coords?lat=19.07&lon=72.87
+@app.route('/weather-by-coords')
+def get_weather_by_coords():
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    # ip = request.remote_addr  # get the caller's IP address
+
+    if is_rate_limited(ip):
+        return jsonify({
+            'error': 'Daily limit reached. Come back tomorrow.'
+        }), 429  # 429 is the official HTTP code for "too many requests"
+    
+    lat = request.args.get('lat')
+    lon = request.args.get('lon')
+
+    if not lat or not lon:
+        return jsonify({ 'error': 'No coordinates provided' }), 400
+
+    url = f'https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API_KEY}&units=metric'
+    response = requests.get(url)
+
+    if response.status_code != 200:
+        return jsonify({ 'error': 'Location not found' }), 404
+
+    return jsonify(format_weather(response.json()))
+
+import threading
+import datetime
+
+# ── Rate limit storage ────────────────────────────
+# Key: IP address   Value: number of requests today
+request_counts = {}
+
+# How many requests one IP is allowed per day
+DAILY_LIMIT = 20  # low for learning — raise later
+
+# ── The check function ────────────────────────────
+def is_rate_limited(ip):
+    # If this IP hasn't been seen before, start them at 0
+    if ip not in request_counts:
+        request_counts[ip] = 0
+
+    # Increment their count
+    request_counts[ip] += 1
+
+    # If they're over the limit, return True (= blocked)
+    return request_counts[ip] > DAILY_LIMIT
+
+# ── Midnight reset ────────────────────────────────
+def reset_counts():
+    # Clear everyone's count
+    request_counts.clear()
+
+    # Schedule this function to run again in 24 hours
+    # threading.Timer runs a function after N seconds
+    # 86400 seconds = 24 hours
+    threading.Timer(86400, reset_counts).start()
+
+# Start the reset timer when the server boots
+reset_counts()
+
+# ── Start the server ──────────────────────────────
+if __name__ == '__main__':
+    app.run(debug=True)

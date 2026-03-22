@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Skies — Weather</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Outfit:wght@700;800&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>🌤 Skies</h1>
+        <p class="subtitle">Check weather anywhere</p>
+
+        <div class="search-row">
+            <input id="city-input" type="text" placeholder="Enter a city..." />
+            <button id="search-btn">Search</button>
+        </div>
+
+        <button id="location-btn">📍 Use my location</button>
+
+        <p class="error" id="error-msg"></p>
+
+        <div class="card" id="weather-card">
+
+            <div class="card-header">
+                <div>
+                    <div class="card-city" id="card-city"></div>
+                    <div class="card-condition" id="card-condition"></div>
+                </div>
+                <div class="card-temp" id="card-temp"></div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-icon">💧</span>
+                    <div class="stat-label">Humidity</div>
+                    <div class="stat-value" id="stat-humidity"></div>
+                </div>
+                <div class="stat">
+                    <span class="stat-icon">💨</span>
+                    <div class="stat-label">Wind</div>
+                    <div class="stat-value" id="stat-wind"></div>
+                </div>
+                <div class="stat">
+                    <span class="stat-icon">🔺</span>
+                    <div class="stat-label">High</div>
+                    <div class="stat-value" id="stat-high"></div>
+                </div>
+                <div class="stat">
+                    <span class="stat-icon">🔻</span>
+                    <div class="stat-label">Low</div>
+                    <div class="stat-value" id="stat-low"></div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
