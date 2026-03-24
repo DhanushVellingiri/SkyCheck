@@ -2,7 +2,7 @@
 // While developing on your laptop, this stays as is.
 // When you deploy to Render later, you'll change this
 // to your Render URL e.g. https://skycheck.onrender.com
-const BACKEND = 'http://127.0.0.1:5000';
+const BACKEND = 'https://skycheck-vfdm.onrender.com/';
 
 // ── Helpers ──────────────────────────────────────
 function showError(msg) {
