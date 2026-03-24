@@ -7,7 +7,9 @@ from dotenv import load_dotenv
 load_dotenv() # This is the magic line that loads your .env file!
 
 app = Flask(__name__)
-CORS(app)
+
+#CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 API_KEY = os.getenv('API_KEY')
 
@@ -41,7 +43,7 @@ def get_weather():
         return jsonify({ 'error': 'Daily limit reached. Come back tomorrow.' }), 429
     if response.status_code != 200:
         return jsonify({ 'error': 'City not found. Check the spelling.' }), 404
-    
+
     return jsonify(format_weather(response.json()))
 
 # ── Endpoint 2: search by coordinates ────────────
@@ -67,4 +69,4 @@ def get_weather_by_coords():
 
 # ── Start the server ──────────────────────────────
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
