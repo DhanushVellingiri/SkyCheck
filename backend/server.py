@@ -37,8 +37,6 @@ def get_weather():
     url      = f'https://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric'
     response = requests.get(url)
 
-    if response.status_code != 200:
-        return jsonify({ 'error': 'City not found. Check the spelling and try again.' }), 404
     if response.status_code == 429:
         return jsonify({ 'error': 'Daily limit reached. Come back tomorrow.' }), 429
     if response.status_code != 200:
@@ -58,14 +56,22 @@ def get_weather_by_coords():
     url      = f'https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API_KEY}&units=metric'
     response = requests.get(url)
 
-    if response.status_code != 200:
-        return jsonify({ 'error': 'Location not found.' }), 404
     if response.status_code == 429:
         return jsonify({ 'error': 'Daily limit reached. Come back tomorrow.' }), 429
     if response.status_code != 200:
         return jsonify({ 'error': 'City not found. Check the spelling.' }), 404
     
     return jsonify(format_weather(response.json()))
+
+#New routes for health and /
+@app.route("/")
+def home():
+    return "Backend is running 🚀"
+
+@app.route("/health")
+def health():
+    return jsonify({"status": "ok"})
+
 
 # ── Start the server ──────────────────────────────
 if __name__ == '__main__':
